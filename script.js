@@ -116,6 +116,12 @@
       arpeggio.forEach((f, i) => {
         playSynthTone(f, 'sine', 1.4, sfxGainNode, i * 0.06);
       });
+    },
+
+    playShutter() {
+      if (!audioCtx || isSfxMuted) return;
+      playSynthTone(1200, 'triangle', 0.08, sfxGainNode, 0);
+      playSynthTone(1800, 'sine', 0.15, sfxGainNode, 0.04);
     }
   };
 
@@ -502,12 +508,33 @@
   });
 
   // =========================================================================
+  // CENTRAL MODAL MANAGER & SCROLL LOCK
+  // =========================================================================
+  function openModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('active');
+    document.body.classList.add('modal-open');
+    document.documentElement.classList.add('modal-open');
+  }
+
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('active');
+    const remainingActive = document.querySelectorAll('.genshin-modal-overlay.active');
+    if (remainingActive.length === 0) {
+      document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
+    }
+  }
+
+  // =========================================================================
   // 5. GENSHIN IMPACT SECTION – ARCHON QUEST INTERACTION
   // =========================================================================
   const objectiveItems = document.querySelectorAll('.objective-item');
   const btnClaimQuest = document.getElementById('btn-claim-quest');
   const questModal = document.getElementById('quest-modal');
   const btnCloseQuestModal = document.getElementById('btn-close-quest-modal');
+  const btnCloseQuestIcon = document.getElementById('btn-close-quest-icon');
 
   objectiveItems.forEach(item => {
     item.addEventListener('click', () => {
@@ -537,14 +564,21 @@
 
       // Open Genshin quest completion modal
       setTimeout(() => {
-        if (questModal) questModal.classList.add('active');
+        if (questModal) openModal(questModal);
       }, 350);
     });
   }
 
   if (btnCloseQuestModal && questModal) {
     btnCloseQuestModal.addEventListener('click', () => {
-      questModal.classList.remove('active');
+      closeModal(questModal);
+      SFX.playPop();
+    });
+  }
+
+  if (btnCloseQuestIcon && questModal) {
+    btnCloseQuestIcon.addEventListener('click', () => {
+      closeModal(questModal);
       SFX.playPop();
     });
   }
@@ -676,12 +710,13 @@
   const giftBox = document.getElementById('birthday-gift-box');
   const giftRevealModal = document.getElementById('gift-reveal-modal');
   const btnClaimRewardFinal = document.getElementById('btn-claim-reward-final');
+  const btnCloseGiftModal = document.getElementById('btn-close-gift-modal');
   let giftOpened = false;
 
   if (giftBox) {
     giftBox.addEventListener('click', () => {
       if (giftOpened) {
-        if (giftRevealModal) giftRevealModal.classList.add('active');
+        if (giftRevealModal) openModal(giftRevealModal);
         return;
       }
       giftOpened = true;
@@ -693,7 +728,7 @@
 
       // Open reward modal after burst
       setTimeout(() => {
-        if (giftRevealModal) giftRevealModal.classList.add('active');
+        if (giftRevealModal) openModal(giftRevealModal);
       }, 400);
     });
 
@@ -709,7 +744,7 @@
     btnClaimRewardFinal.addEventListener('click', () => {
       SFX.playQuestComplete();
       triggerCelebrationBurst(width / 2, height / 2, 100);
-      giftRevealModal.classList.remove('active');
+      closeModal(giftRevealModal);
 
       // Smooth scroll to the farewell conclusion
       const farewell = document.getElementById('farewell');
@@ -721,12 +756,650 @@
     });
   }
 
+  if (btnCloseGiftModal && giftRevealModal) {
+    btnCloseGiftModal.addEventListener('click', () => {
+      closeModal(giftRevealModal);
+      SFX.playPop();
+    });
+  }
+
+  // =========================================================================
+  // 11. TRAVELER'S PHOTO STUDIO & CAMERA LOGIC
+  // =========================================================================
+  const PHOTO_DESTINATIONS = {
+    mondstadt: {
+      name: "Mondstadt – Windrise",
+      title: "Birthday in Mondstadt",
+      imgSrc: "images/bg_mondstadt.jpg",
+      fileName: "Win_Birthday_Mondstadt.png",
+      accentColor: "#10b981",
+      secondaryColor: "#ffd166",
+      decor: "dandelion"
+    },
+    fontaine: {
+      name: "Fontaine – Court of Fontaine",
+      title: "A Royal Day in Fontaine",
+      imgSrc: "images/bg_fontaine.jpg",
+      fileName: "Win_Birthday_Fontaine.png",
+      accentColor: "#0ea5e9",
+      secondaryColor: "#ffd700",
+      decor: "bubbles"
+    },
+    inazuma: {
+      name: "Inazuma – Grand Narukami Shrine",
+      title: "Under the Sakura in Inazuma",
+      imgSrc: "images/bg_inazuma.jpg",
+      fileName: "Win_Birthday_Inazuma.png",
+      accentColor: "#ec4899",
+      secondaryColor: "#d8b4fe",
+      decor: "sakura"
+    },
+    sumeru: {
+      name: "Sumeru – Garden of Wishes",
+      title: "A Birthday in Sumeru",
+      imgSrc: "images/bg_sumeru.jpg",
+      fileName: "Win_Birthday_Sumeru.png",
+      accentColor: "#22c55e",
+      secondaryColor: "#facc15",
+      decor: "leaves"
+    }
+  };
+
+  let currentDestKey = 'mondstadt';
+  let currentCameraStream = null;
+  let facingMode = 'user'; // front-facing camera default
+  let currentComposedBlob = null;
+  let currentComposedDataUrl = null;
+
+  const cameraModal = document.getElementById('camera-modal');
+  const cameraVideo = document.getElementById('camera-video');
+  const btnCloseCamera = document.getElementById('btn-close-camera');
+  const btnSwitchCamera = document.getElementById('btn-switch-camera');
+  const btnCapturePhoto = document.getElementById('btn-capture-photo');
+  const cameraSelectedDestLabel = document.getElementById('camera-selected-dest-label');
+  const cameraErrorBox = document.getElementById('camera-error-box');
+  const cameraErrorMsg = document.getElementById('camera-error-msg');
+  const btnRetryCamera = document.getElementById('btn-retry-camera');
+  const cameraFileInput = document.getElementById('camera-file-input');
+  const cameraFallbackFile = document.getElementById('camera-fallback-file');
+  const cameraProcessingSpinner = document.getElementById('camera-processing-spinner');
+  const cameraShutterFlash = document.getElementById('camera-shutter-flash');
+
+  const photoResultModal = document.getElementById('photo-result-modal');
+  const btnCloseResultModal = document.getElementById('btn-close-result-modal');
+  const resultComposedImage = document.getElementById('result-composed-image');
+  const btnDownloadPhoto = document.getElementById('btn-download-photo');
+  const btnRetakePhoto = document.getElementById('btn-retake-photo');
+  const btnChooseOtherBg = document.getElementById('btn-choose-other-bg');
+  const compositionCanvas = document.getElementById('composition-canvas');
+
+  // Destination Card Clicks
+  const btnStartCams = document.querySelectorAll('.btn-start-cam');
+  const destCards = document.querySelectorAll('.dest-card');
+
+  btnStartCams.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const destKey = btn.getAttribute('data-bg') || 'mondstadt';
+      openCameraModal(destKey);
+    });
+  });
+
+  destCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const destKey = card.getAttribute('data-bg') || 'mondstadt';
+      openCameraModal(destKey);
+    });
+  });
+
+  function openCameraModal(destKey) {
+    currentDestKey = destKey || 'mondstadt';
+    const dest = PHOTO_DESTINATIONS[currentDestKey];
+
+    if (cameraSelectedDestLabel) {
+      cameraSelectedDestLabel.textContent = `Destination: ${dest.name}`;
+    }
+
+    if (cameraErrorBox) cameraErrorBox.style.display = 'none';
+    if (cameraProcessingSpinner) cameraProcessingSpinner.style.display = 'none';
+    if (cameraModal) openModal(cameraModal);
+
+    SFX.playPop();
+    startCameraStream();
+  }
+
+  function startCameraStream() {
+    stopCameraStream();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showCameraError("Camera access is not supported by your current browser. You can choose a photo from your gallery instead!");
+      return;
+    }
+
+    const constraints = {
+      video: {
+        facingMode: { ideal: facingMode },
+        width: { ideal: 1280 },
+        height: { ideal: 960 }
+      },
+      audio: false
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(stream => {
+        currentCameraStream = stream;
+        if (cameraVideo) {
+          cameraVideo.srcObject = stream;
+          cameraVideo.play().catch(e => console.warn('Video play error:', e));
+        }
+        if (cameraErrorBox) cameraErrorBox.style.display = 'none';
+      })
+      .catch(err => {
+        console.warn('Camera getUserMedia error:', err);
+        showCameraError("Camera access was not granted or is unavailable on this device. You can choose a photo from your device or retry.");
+      });
+  }
+
+  function stopCameraStream() {
+    if (currentCameraStream) {
+      currentCameraStream.getTracks().forEach(track => {
+        try { track.stop(); } catch (e) {}
+      });
+      currentCameraStream = null;
+    }
+    if (cameraVideo) {
+      cameraVideo.srcObject = null;
+    }
+  }
+
+  function showCameraError(msg) {
+    if (cameraErrorMsg) cameraErrorMsg.textContent = msg;
+    if (cameraErrorBox) cameraErrorBox.style.display = 'block';
+  }
+
+  if (btnCloseCamera) {
+    btnCloseCamera.addEventListener('click', () => {
+      stopCameraStream();
+      if (cameraModal) closeModal(cameraModal);
+      SFX.playPop();
+    });
+  }
+
+  if (btnSwitchCamera) {
+    btnSwitchCamera.addEventListener('click', () => {
+      facingMode = (facingMode === 'user') ? 'environment' : 'user';
+      if (cameraVideo) {
+        cameraVideo.style.transform = (facingMode === 'user') ? 'scaleX(-1)' : 'scaleX(1)';
+      }
+      SFX.playPop();
+      startCameraStream();
+    });
+  }
+
+  if (btnRetryCamera) {
+    btnRetryCamera.addEventListener('click', () => {
+      if (cameraErrorBox) cameraErrorBox.style.display = 'none';
+      startCameraStream();
+    });
+  }
+
+  // File Upload Handlers (for gallery uploads or camera fallbacks)
+  [cameraFileInput, cameraFallbackFile].forEach(input => {
+    if (input) {
+      input.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (loadEvt) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx2 = canvas.getContext('2d');
+            ctx2.drawImage(img, 0, 0);
+
+            stopCameraStream();
+            if (cameraProcessingSpinner) cameraProcessingSpinner.style.display = 'flex';
+            processAndComposite(canvas);
+          };
+          img.src = loadEvt.target.result;
+        };
+        reader.readAsDataURL(file);
+        // Reset file input so same file can be selected again
+        input.value = '';
+      });
+    }
+  });
+
+  // Capture Button Click
+  if (btnCapturePhoto) {
+    btnCapturePhoto.addEventListener('click', () => {
+      if (!cameraVideo || !cameraVideo.videoWidth) return;
+
+      // Shutter sound & visual flash
+      SFX.playShutter();
+      if (cameraShutterFlash) {
+        cameraShutterFlash.classList.add('flash-active');
+        setTimeout(() => cameraShutterFlash.classList.remove('flash-active'), 400);
+      }
+
+      // Draw snapshot from video to offscreen canvas
+      const snapCanvas = document.createElement('canvas');
+      const w = cameraVideo.videoWidth || 640;
+      const h = cameraVideo.videoHeight || 480;
+      snapCanvas.width = w;
+      snapCanvas.height = h;
+      const sCtx = snapCanvas.getContext('2d');
+
+      // If front camera, un-mirror so Win looks natural
+      if (facingMode === 'user') {
+        sCtx.translate(w, 0);
+        sCtx.scale(-1, 1);
+      }
+      sCtx.drawImage(cameraVideo, 0, 0, w, h);
+
+      stopCameraStream();
+      if (cameraProcessingSpinner) cameraProcessingSpinner.style.display = 'flex';
+
+      // Slight timeout to let spinner render
+      setTimeout(() => {
+        processAndComposite(snapCanvas);
+      }, 80);
+    });
+  }
+
+  // Person Segmentation & Photo Composition Engine
+  function processAndComposite(selfieCanvas) {
+    const dest = PHOTO_DESTINATIONS[currentDestKey] || PHOTO_DESTINATIONS.mondstadt;
+    const bgImg = new Image();
+
+    bgImg.onload = () => {
+      // Check if MediaPipe SelfieSegmentation is available
+      if (window.SelfieSegmentation) {
+        try {
+          const segmenter = new window.SelfieSegmentation({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+          });
+          segmenter.setOptions({ modelSelection: 1 });
+
+          segmenter.onResults(results => {
+            renderFinalComposition(selfieCanvas, results.segmentationMask, bgImg, dest);
+          });
+
+          segmenter.send({ image: selfieCanvas }).catch(err => {
+            console.warn('MediaPipe send error, applying graceful portrait cutout:', err);
+            renderFinalComposition(selfieCanvas, null, bgImg, dest);
+          });
+        } catch (e) {
+          console.warn('MediaPipe initialization fallback:', e);
+          renderFinalComposition(selfieCanvas, null, bgImg, dest);
+        }
+      } else {
+        // Graceful portrait cutout fallback
+        renderFinalComposition(selfieCanvas, null, bgImg, dest);
+      }
+    };
+
+    bgImg.onerror = () => {
+      // Fallback if background image load fails
+      renderFinalComposition(selfieCanvas, null, null, dest);
+    };
+
+    bgImg.src = dest.imgSrc;
+  }
+
+  // Master Canvas Drawing Function
+  function renderFinalComposition(selfieCanvas, maskCanvas, bgImg, dest) {
+    const canvas = compositionCanvas || document.createElement('canvas');
+    const width = 1200;
+    const height = 900; // 4:3 high-definition ratio
+    canvas.width = width;
+    canvas.height = height;
+    const c = canvas.getContext('2d');
+
+    // 1. Draw Background Image or procedural fallback
+    if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+      c.drawImage(bgImg, 0, 0, width, height);
+    } else {
+      // Scenic gradient fallback
+      const grad = c.createLinearGradient(0, 0, 0, height);
+      grad.addColorStop(0, '#fbcfe8');
+      grad.addColorStop(0.5, '#c084fc');
+      grad.addColorStop(1, '#38bdf8');
+      c.fillStyle = grad;
+      c.fillRect(0, 0, width, height);
+    }
+
+    // Gentle ambient environmental tint
+    c.fillStyle = 'rgba(255, 240, 245, 0.08)';
+    c.fillRect(0, 0, width, height);
+
+    // 2. Prepare Extracted Person
+    const cutoutCanvas = document.createElement('canvas');
+    cutoutCanvas.width = selfieCanvas.width;
+    cutoutCanvas.height = selfieCanvas.height;
+    const cutCtx = cutoutCanvas.getContext('2d');
+
+    if (maskCanvas) {
+      // Pixel-perfect MediaPipe segmentation cutout
+      cutCtx.drawImage(selfieCanvas, 0, 0);
+      cutCtx.globalCompositeOperation = 'destination-in';
+      cutCtx.drawImage(maskCanvas, 0, 0, selfieCanvas.width, selfieCanvas.height);
+      cutCtx.globalCompositeOperation = 'source-over';
+    } else {
+      // Elegant feathered oval portrait framing fallback
+      cutCtx.drawImage(selfieCanvas, 0, 0);
+      cutCtx.globalCompositeOperation = 'destination-in';
+      const radGrad = cutCtx.createRadialGradient(
+        selfieCanvas.width / 2, selfieCanvas.height * 0.45, selfieCanvas.width * 0.25,
+        selfieCanvas.width / 2, selfieCanvas.height * 0.45, selfieCanvas.width * 0.48
+      );
+      radGrad.addColorStop(0, 'rgba(0,0,0,1)');
+      radGrad.addColorStop(0.85, 'rgba(0,0,0,0.95)');
+      radGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      cutCtx.fillStyle = radGrad;
+      cutCtx.fillRect(0, 0, selfieCanvas.width, selfieCanvas.height);
+      cutCtx.globalCompositeOperation = 'source-over';
+    }
+
+    // 3. Composite Person onto Destination Scenery
+    // Scale person to look natural in front of scenery
+    const personTargetHeight = height * 0.76;
+    const personRatio = cutoutCanvas.width / cutoutCanvas.height;
+    const personTargetWidth = personTargetHeight * personRatio;
+    const personX = (width - personTargetWidth) / 2;
+    const personY = height - personTargetHeight + 20;
+
+    // Subtle drop shadow behind person for realistic integration
+    c.save();
+    c.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    c.shadowBlur = 35;
+    c.shadowOffsetX = 0;
+    c.shadowOffsetY = 12;
+    c.drawImage(cutoutCanvas, personX, personY, personTargetWidth, personTargetHeight);
+    c.restore();
+
+    // 4. Region-Specific Particle Accents
+    drawRegionAccents(c, width, height, dest.decor);
+
+    // 5. Genshin Impact Decorative Frame & Gold Filigree
+    drawGenshinFrame(c, width, height, dest);
+
+    // 6. Render Typography directly onto the downloadable Canvas
+    drawBirthdayTypography(c, width, height, dest);
+
+    // Convert to Image & Blob
+    currentComposedDataUrl = canvas.toDataURL('image/png');
+    if (resultComposedImage) {
+      resultComposedImage.src = currentComposedDataUrl;
+    }
+
+    canvas.toBlob(blob => {
+      currentComposedBlob = blob;
+    }, 'image/png');
+
+    // Close camera modal, hide spinner, open photo result modal
+    if (cameraProcessingSpinner) cameraProcessingSpinner.style.display = 'none';
+    if (cameraModal) closeModal(cameraModal);
+    if (photoResultModal) openModal(photoResultModal);
+
+    SFX.playQuestComplete();
+    triggerCelebrationBurst(window.innerWidth / 2, window.innerHeight / 2, 90);
+  }
+
+  // Draw floating particles based on destination
+  function drawRegionAccents(c, w, h, decorType) {
+    c.save();
+    const count = 28;
+
+    if (decorType === 'sakura') {
+      // Inazuma pink sakura petals
+      for (let i = 0; i < count; i++) {
+        const px = (Math.sin(i * 137.5) * 0.5 + 0.5) * w;
+        const py = ((i * 37) % h);
+        const size = 10 + (i % 8) * 2;
+        const rot = (i * 45) * Math.PI / 180;
+        c.save();
+        c.translate(px, py);
+        c.rotate(rot);
+        c.fillStyle = (i % 2 === 0) ? 'rgba(255, 182, 193, 0.78)' : 'rgba(255, 209, 220, 0.85)';
+        c.beginPath();
+        c.moveTo(0, 0);
+        c.bezierCurveTo(size * 0.6, -size * 0.8, size, 0, 0, size);
+        c.bezierCurveTo(-size, 0, -size * 0.6, -size * 0.8, 0, 0);
+        c.fill();
+        c.restore();
+      }
+    } else if (decorType === 'dandelion') {
+      // Mondstadt dandelions & golden sparkles
+      for (let i = 0; i < count; i++) {
+        const px = ((i * 47) % w);
+        const py = ((i * 59) % h);
+        c.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        c.beginPath();
+        c.arc(px, py, 3 + (i % 4), 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = 'rgba(255, 215, 0, 0.7)';
+        c.beginPath();
+        c.arc(px + 12, py - 8, 2, 0, Math.PI * 2);
+        c.fill();
+      }
+    } else if (decorType === 'bubbles') {
+      // Fontaine glowing water bubbles & motes
+      for (let i = 0; i < count; i++) {
+        const px = ((i * 53) % w);
+        const py = ((i * 71) % h);
+        const r = 5 + (i % 9) * 2;
+        c.strokeStyle = 'rgba(125, 211, 252, 0.75)';
+        c.lineWidth = 2;
+        c.fillStyle = 'rgba(224, 242, 254, 0.25)';
+        c.beginPath();
+        c.arc(px, py, r, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+      }
+    } else {
+      // Sumeru glowing Dendro motes & leaves
+      for (let i = 0; i < count; i++) {
+        const px = ((i * 61) % w);
+        const py = ((i * 43) % h);
+        c.fillStyle = 'rgba(134, 239, 172, 0.8)';
+        c.shadowColor = '#86efac';
+        c.shadowBlur = 8;
+        c.beginPath();
+        c.arc(px, py, 3 + (i % 4), 0, Math.PI * 2);
+        c.fill();
+      }
+    }
+    c.restore();
+  }
+
+  // Draw Genshin-style decorative borders & gold filigree
+  function drawGenshinFrame(c, w, h, dest) {
+    c.save();
+
+    // Inner gold border line
+    const pad = 24;
+    c.strokeStyle = '#ffd700';
+    c.lineWidth = 3;
+    c.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
+
+    // Subtle second thin line
+    c.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    c.lineWidth = 1;
+    c.strokeRect(pad + 6, pad + 6, w - (pad + 6) * 2, h - (pad + 6) * 2);
+
+    // Corner filigree ornaments
+    const corners = [
+      { x: pad + 2, y: pad + 2, rot: 0 },
+      { x: w - pad - 2, y: pad + 2, rot: 90 },
+      { x: w - pad - 2, y: h - pad - 2, rot: 180 },
+      { x: pad + 2, y: h - pad - 2, rot: 270 }
+    ];
+
+    corners.forEach(cr => {
+      c.save();
+      c.translate(cr.x, cr.y);
+      c.rotate((cr.rot * Math.PI) / 180);
+      c.fillStyle = '#ffd700';
+      c.beginPath();
+      c.moveTo(0, 0);
+      c.lineTo(26, 0);
+      c.lineTo(26, 5);
+      c.lineTo(5, 5);
+      c.lineTo(5, 26);
+      c.lineTo(0, 26);
+      c.closePath();
+      c.fill();
+
+      // Corner diamond gem
+      c.beginPath();
+      c.moveTo(12, 12);
+      c.lineTo(17, 8);
+      c.lineTo(22, 12);
+      c.lineTo(17, 16);
+      c.closePath();
+      c.fillStyle = dest.accentColor;
+      c.fill();
+      c.strokeStyle = '#fff';
+      c.lineWidth = 1;
+      c.stroke();
+      c.restore();
+    });
+
+    c.restore();
+  }
+
+  // Draw elegant typography on canvas
+  function drawBirthdayTypography(c, w, h, dest) {
+    c.save();
+
+    // 1. Top Location Badge Pill
+    const pillW = 340;
+    const pillH = 38;
+    const pillX = (w - pillW) / 2;
+    const pillY = 38;
+
+    c.fillStyle = 'rgba(15, 23, 42, 0.78)';
+    c.beginPath();
+    c.roundRect(pillX, pillY, pillW, pillH, 19);
+    c.fill();
+    c.strokeStyle = '#ffd700';
+    c.lineWidth = 1.5;
+    c.stroke();
+
+    c.font = 'bold 15px Cinzel, serif';
+    c.fillStyle = '#fef08a';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(`✦ ${dest.name.toUpperCase()} ✦`, w / 2, pillY + pillH / 2);
+
+    // 2. Bottom Shaded Banner Gradient for Text Readability
+    const bannerGrad = c.createLinearGradient(0, h - 140, 0, h);
+    bannerGrad.addColorStop(0, 'rgba(15, 5, 25, 0)');
+    bannerGrad.addColorStop(0.3, 'rgba(15, 5, 25, 0.65)');
+    bannerGrad.addColorStop(1, 'rgba(15, 5, 25, 0.92)');
+    c.fillStyle = bannerGrad;
+    c.fillRect(0, h - 140, w, 140);
+
+    // 3. Main Title: "Happy Birthday, Win! ♡"
+    c.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    c.shadowBlur = 12;
+    c.shadowOffsetY = 3;
+
+    c.font = '900 42px Cinzel, serif';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+
+    const goldGrad = c.createLinearGradient(w / 2 - 250, 0, w / 2 + 250, 0);
+    goldGrad.addColorStop(0, '#ffffff');
+    goldGrad.addColorStop(0.3, '#ffd700');
+    goldGrad.addColorStop(0.7, '#f59e0b');
+    goldGrad.addColorStop(1, '#ffffff');
+    c.fillStyle = goldGrad;
+    c.fillText("Happy Birthday, Win! ♡", w / 2, h - 75);
+
+    // 4. Subtitle: "Your Adventure Continues..."
+    c.font = 'italic 20px "Playfair Display", serif';
+    c.fillStyle = '#fbcfe8';
+    c.shadowBlur = 8;
+    c.fillText("Your Adventure Continues...", w / 2, h - 38);
+
+    c.restore();
+  }
+
+  // Result Modal Button Handlers
+  if (btnCloseResultModal) {
+    btnCloseResultModal.addEventListener('click', () => {
+      if (photoResultModal) closeModal(photoResultModal);
+      SFX.playPop();
+    });
+  }
+
+  if (btnRetakePhoto) {
+    btnRetakePhoto.addEventListener('click', () => {
+      if (photoResultModal) closeModal(photoResultModal);
+      openCameraModal(currentDestKey);
+    });
+  }
+
+  if (btnChooseOtherBg) {
+    btnChooseOtherBg.addEventListener('click', () => {
+      if (photoResultModal) closeModal(photoResultModal);
+      const studioSec = document.getElementById('photo-studio');
+      if (studioSec) {
+        studioSec.scrollIntoView({ behavior: 'smooth' });
+      }
+      SFX.playPop();
+    });
+  }
+
+  if (btnDownloadPhoto) {
+    btnDownloadPhoto.addEventListener('click', () => {
+      const dest = PHOTO_DESTINATIONS[currentDestKey] || PHOTO_DESTINATIONS.mondstadt;
+      SFX.playPop();
+
+      // Mobile Web Share API support when available
+      if (navigator.share && currentComposedBlob) {
+        const file = new File([currentComposedBlob], dest.fileName, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: "Win's Birthday Adventure",
+            text: `Happy Birthday, Win! ♡ Memory from ${dest.name}`
+          }).catch(err => {
+            console.log('Share dismissed, triggering direct download:', err);
+            triggerDirectDownload(dest.fileName);
+          });
+          return;
+        }
+      }
+
+      // Standard browser download
+      triggerDirectDownload(dest.fileName);
+    });
+  }
+
+  function triggerDirectDownload(fileName) {
+    if (!currentComposedDataUrl) return;
+    const a = document.createElement('a');
+    a.href = currentComposedDataUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    triggerCelebrationBurst(window.innerWidth / 2, window.innerHeight / 2, 40);
+  }
+
   // Close modals on overlay backdrop click
-  [questModal, giftRevealModal].forEach(modal => {
+  [questModal, giftRevealModal, cameraModal, photoResultModal].forEach(modal => {
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
-          modal.classList.remove('active');
+          if (modal === cameraModal) stopCameraStream();
+          closeModal(modal);
         }
       });
     }
@@ -735,10 +1408,16 @@
   // ESC key to close open modals
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (questModal) questModal.classList.remove('active');
-      if (giftRevealModal) giftRevealModal.classList.remove('active');
+      if (questModal && questModal.classList.contains('active')) closeModal(questModal);
+      if (giftRevealModal && giftRevealModal.classList.contains('active')) closeModal(giftRevealModal);
+      if (cameraModal && cameraModal.classList.contains('active')) {
+        stopCameraStream();
+        closeModal(cameraModal);
+      }
+      if (photoResultModal && photoResultModal.classList.contains('active')) closeModal(photoResultModal);
     }
   });
 
-  console.log("Win's Special Adventure initialized successfully! ✦");
+  console.log("Win's Special Adventure & Traveler's Photo Studio initialized successfully! ✦");
 })();
+
