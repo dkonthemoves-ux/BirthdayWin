@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Win's Special Adventure | A Journey Through Teyvat & Beyond</title>
+  <meta name="description" content="A special birthday adventure website for Win, inspired by Genshin Impact, nature, flowers, hiking, running, and pickleball!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Caveat:wght@600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Particle & Ambient Canvas -->
+  <canvas id="ambient-canvas" aria-hidden="true"></canvas>
+
+  <!-- Sound & Music Floating Controls -->
+  <div class="audio-control-bar" role="region" aria-label="Audio controls">
+    <button id="music-toggle" class="audio-btn" aria-label="Toggle Background Music" title="Play / Pause Genshin Melodic Music">
+      <svg class="icon-music" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"></path>
+        <circle cx="6" cy="18" r="3"></circle>
+        <circle cx="18" cy="16" r="3"></circle>
+      </svg>
+      <span class="btn-text">BGM: <span id="music-status">OFF</span></span>
+    </button>
+    <button id="sfx-toggle" class="audio-btn" aria-label="Toggle Sound Effects" title="Mute / Unmute Sound Effects">
+      <svg class="icon-sfx" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      </svg>
+      <span class="btn-text">SFX: <span id="sfx-status">ON</span></span>
+    </button>
+  </div>
+
+  <!-- Quick Floating Waypoint Navigation -->
+  <nav class="floating-nav" id="floating-nav" aria-label="Quest Waypoints">
+    <button class="nav-toggle" id="nav-toggle" aria-label="Open Navigation Map">
+      <span class="nav-icon-compass">✧</span>
+      <span class="nav-label">Waypoints</span>
+    </button>
+    <div class="nav-menu" id="nav-menu">
+      <a href="#hero" class="nav-link active" data-target="hero"><span>01</span> Welcome</a>
+      <a href="#archon-quest" class="nav-link" data-target="archon-quest"><span>02</span> Archon Quest</a>
+      <a href="#flower-garden" class="nav-link" data-target="flower-garden"><span>03</span> Flower Garden</a>
+      <a href="#real-adventures" class="nav-link" data-target="real-adventures"><span>04</span> Real Adventures</a>
+      <a href="#achievements" class="nav-link" data-target="achievements"><span>05</span> Achievements</a>
+      <a href="#teyvat-bulletin" class="nav-link" data-target="teyvat-bulletin"><span>06</span> Traveler Memes</a>
+      <a href="#birthday-letter" class="nav-link" data-target="birthday-letter"><span>07</span> Birthday Letter</a>
+      <a href="#surprise-gift" class="nav-link" data-target="surprise-gift"><span>08</span> Final Reward</a>
+      <a href="#farewell" class="nav-link" data-target="farewell"><span>09</span> Next Chapter</a>
+    </div>
+  </nav>
+
+  <!-- Reading Progress Bar -->
+  <div class="scroll-progress-container" aria-hidden="true">
+    <div class="scroll-progress-bar" id="scroll-progress"></div>
+  </div>
+
+  <!-- ==============================================
+       1. INTRODUCTION SCREEN – A SPECIAL EVENT UNLOCKED
+       ============================================== -->
+  <section id="intro-screen" class="intro-screen" aria-label="Special Event Intro Screen">
+    <div class="intro-backdrop">
+      <div class="floating-celestial-island"></div>
+      <div class="intro-particles-wrap" id="intro-particles"></div>
+    </div>
+
+    <div class="intro-content">
+      <div class="event-badge">
+        <span class="star-accent">✦</span>
+        <span class="badge-text">LIMITED TIME EVENT AVAILABLE</span>
+        <span class="star-accent">✦</span>
+      </div>
+
+      <h1 class="intro-title">
+        <span class="intro-greeting">Hey, Win!</span>
+        <span class="intro-highlight">A Special Event Has Arrived!</span>
+      </h1>
+
+      <p class="intro-subtitle">A little birthday adventure awaits you...</p>
+
+      <!-- Interactive Treasure Chest Graphic -->
+      <div class="chest-container" id="intro-chest" role="button" tabindex="0" aria-label="Precious Birthday Chest. Click to open!">
+        <div class="chest-glow-ring"></div>
+        <div class="chest-box">
+          <div class="chest-lid">
+            <div class="chest-lid-top"></div>
+            <div class="chest-gold-trim"></div>
+            <div class="chest-gem">✦</div>
+          </div>
+          <div class="chest-base">
+            <div class="chest-lock"></div>
+            <div class="chest-ornament left"></div>
+            <div class="chest-ornament right"></div>
+          </div>
+        </div>
+        <div class="chest-hint">Click the chest or button below to enter!</div>
+      </div>
+
+      <button id="btn-enter" class="btn-genshin btn-enter-adventure" aria-label="Enter Win's Birthday Adventure">
+        <span class="btn-shine"></span>
+        <span class="btn-icon">✦</span>
+        <span class="btn-text">ENTER THE ADVENTURE</span>
+        <span class="btn-icon">✦</span>
+      </button>
+
+      <div class="intro-foot-note">
+        <span class="note-icon">🎵</span> Music will softly play once you enter. Toggle anytime at top right!
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Website Container (Revealed after entering) -->
+  <main id="main-content" class="main-content">
+
+    <!-- ==============================================
+         2. MAIN HERO SECTION – HAPPY BIRTHDAY WIN!
+         ============================================== -->
+    <header id="hero" class="hero-section">
+      <div class="hero-bg-art">
+        <div class="sun-glamour"></div>
+        <div class="mountain-silhouette left"></div>
+        <div class="mountain-silhouette right"></div>
+        <div class="cloud-layer layer-1"></div>
+        <div class="cloud-layer layer-2"></div>
+      </div>
+
+      <div class="hero-inner container">
+        <!-- Event Banner Tag -->
+        <div class="event-banner-pill" data-aos="fade-down">
+          <span class="banner-icon-primogem">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+              <polygon points="12,2 17,9 22,12 17,15 12,22 7,15 2,12 7,9" fill="url(#primoGradHero)" stroke="#ffd700" stroke-width="1"/>
+              <defs>
+                <linearGradient id="primoGradHero" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ff99c8"/>
+                  <stop offset="50%" stop-color="#70d6ff"/>
+                  <stop offset="100%" stop-color="#ffd166"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span class="banner-title">SPECIAL EVENT WISH BANNER: TRAVELER'S CELEBRATION</span>
+        </div>
+
+        <div class="hero-heading-wrap" data-aos="zoom-in">
+          <div class="celestial-emblem">
+            <span class="emblem-wing left"></span>
+            <span class="emblem-star">✦ ✧ ✦</span>
+            <span class="emblem-wing right"></span>
+          </div>
+          <h1 class="hero-main-title">
+            HAPPY BIRTHDAY, <span class="highlight-name">WIN!</span> <span class="heart-symbol">♡</span>
+          </h1>
+          <p class="hero-tagline">
+            "Today, you're the main character of your own special adventure."
+          </p>
+        </div>
+
+        <!-- Centerpiece Animated Flower Garland & Bouquet Badge -->
+        <div class="hero-flower-cluster" data-aos="fade-up" data-aos-delay="200">
+          <div class="floating-butterflies">
+            <div class="butterfly b1">🦋</div>
+            <div class="butterfly b2">🦋</div>
+            <div class="butterfly b3">🦋</div>
+          </div>
+
+          <div class="bouquet-medallion">
+            <svg class="medallion-svg" viewBox="0 0 200 200" width="170" height="170" aria-hidden="true">
+              <!-- Decorative ring -->
+              <circle cx="100" cy="100" r="92" fill="none" stroke="rgba(255, 215, 0, 0.4)" stroke-width="2" stroke-dasharray="6,4" />
+              <circle cx="100" cy="100" r="84" fill="rgba(255, 255, 255, 0.4)" stroke="rgba(255, 182, 193, 0.7)" stroke-width="3" />
+              <!-- Bouquet art inside -->
+              <g class="medallion-flowers" transform="translate(15, 15)">
+                <!-- Leaves -->
+                <path d="M85 110 C60 130 40 100 85 85" fill="#74c69d" opacity="0.9"/>
+                <path d="M85 110 C110 130 130 100 85 85" fill="#52b788" opacity="0.9"/>
+                <!-- Stems with ribbon -->
+                <line x1="85" y1="85" x2="85" y2="135" stroke="#40916c" stroke-width="5" stroke-linecap="round"/>
+                <path d="M75 125 C85 118 85 132 95 125" fill="none" stroke="#ffb703" stroke-width="4"/>
+                <circle cx="85" cy="125" r="4" fill="#fb8500"/>
+                <!-- Sunflowers & Roses -->
+                <circle cx="85" cy="65" r="24" fill="#ffb703"/>
+                <circle cx="85" cy="65" r="12" fill="#7f4f24"/>
+                <circle cx="65" cy="80" r="18" fill="#ff758f"/>
+                <circle cx="105" cy="80" r="18" fill="#c77dff"/>
+                <circle cx="85" cy="95" r="16" fill="#ffafcc"/>
+                <circle cx="65" cy="80" r="8" fill="#ff4d6d"/>
+                <circle cx="105" cy="80" r="8" fill="#9d4edd"/>
+              </g>
+            </svg>
+            <div class="medallion-sparkle s1">✦</div>
+            <div class="medallion-sparkle s2">✧</div>
+            <div class="medallion-sparkle s3">✦</div>
+          </div>
+        </div>
+
+        <div class="hero-blessing-box" data-aos="fade-up" data-aos-delay="300">
+          <div class="quote-mark">“</div>
+          <p class="hero-blessing-text">
+            May this new chapter bring you exciting journeys, beautiful discoveries, unforgettable experiences, and countless reasons to smile.
+          </p>
+          <div class="quote-mark end">”</div>
+        </div>
+
+        <div class="hero-actions" data-aos="fade-up" data-aos-delay="400">
+          <a href="#archon-quest" class="btn-genshin btn-quest-start">
+            <span class="btn-shine"></span>
+            <span class="btn-icon">⚔️</span>
+            <span class="btn-text">START YOUR BIRTHDAY QUEST</span>
+            <span class="btn-icon">✧</span>
+          </a>
+        </div>
+
+        <div class="scroll-down-hint">
+          <span>Scroll to Explore</span>
+          <div class="scroll-arrow-down">↓</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==============================================
+         3. GENSHIN IMPACT SECTION – BIRTHDAY ARCHON QUEST
+         ============================================== -->
+    <section id="archon-quest" class="quest-section section-padding">
+      <div class="container">
+        <!-- Genshin Quest Header -->
+        <div class="quest-header-banner" data-aos="fade-down">
+          <div class="quest-tag">
+            <span class="quest-icon-emblem">✦</span>
+            <span class="quest-category">NEW ARCHON QUEST UNLOCKED</span>
+            <span class="quest-icon-emblem">✦</span>
+          </div>
+          <h2 class="quest-chapter-title">
+            Chapter: A New Year of Adventures – Win's Birthday
+          </h2>
+          <div class="quest-divider-filigree">
+            <span class="filigree-line"></span>
+            <span class="filigree-diamond">◆</span>
+            <span class="filigree-line"></span>
+          </div>
+        </div>
+
+        <!-- Quest Card Frame -->
+        <div class="quest-card" data-aos="zoom-in" data-aos-delay="100">
+          <div class="quest-card-corner top-left"></div>
+          <div class="quest-card-corner top-right"></div>
+          <div class="quest-card-corner bottom-left"></div>
+          <div class="quest-card-corner bottom-right"></div>
+
+          <div class="quest-body">
+            <div class="quest-desc-box">
+              <div class="quest-pin-icon">📜</div>
+              <p class="quest-desc-text">
+                "A special day has arrived in Teyvat! Today, our featured Traveler is <strong>Win</strong>. Her mission is simple: enjoy the day, collect wonderful memories, and receive all the blessings this new chapter has to offer."
+              </p>
+            </div>
+
+            <!-- Objectives List -->
+            <div class="quest-objectives-block">
+              <h3 class="objectives-heading">
+                <span class="heading-icon">🎯</span> Quest Objectives
+              </h3>
+              <ul class="objectives-list" id="objectives-list">
+                <li class="objective-item" data-id="1">
+                  <div class="obj-checkbox" role="checkbox" aria-checked="false" tabindex="0">
+                    <span class="check-mark">✔</span>
+                  </div>
+                  <div class="obj-content">
+                    <span class="obj-label">OBJECTIVE 1:</span>
+                    <span class="obj-text">Enjoy Your Special Day</span>
+                  </div>
+                  <span class="obj-status">Ready</span>
+                </li>
+
+                <li class="objective-item" data-id="2">
+                  <div class="obj-checkbox" role="checkbox" aria-checked="false" tabindex="0">
+                    <span class="check-mark">✔</span>
+                  </div>
+                  <div class="obj-content">
+                    <span class="obj-label">OBJECTIVE 2:</span>
+                    <span class="obj-text">Collect Beautiful Memories</span>
+                  </div>
+                  <span class="obj-status">Ready</span>
+                </li>
+
+                <li class="objective-item" data-id="3">
+                  <div class="obj-checkbox" role="checkbox" aria-checked="false" tabindex="0">
+                    <span class="check-mark">✔</span>
+                  </div>
+                  <div class="obj-content">
+                    <span class="obj-label">OBJECTIVE 3:</span>
+                    <span class="obj-text">Discover New Adventures</span>
+                  </div>
+                  <span class="obj-status">Ready</span>
+                </li>
+
+                <li class="objective-item" data-id="4">
+                  <div class="obj-checkbox" role="checkbox" aria-checked="false" tabindex="0">
+                    <span class="check-mark">✔</span>
+                  </div>
+                  <div class="obj-content">
+                    <span class="obj-label">OBJECTIVE 4:</span>
+                    <span class="obj-text">Receive Countless Blessings</span>
+                  </div>
+                  <span class="obj-status">Ready</span>
+                </li>
+
+                <li class="objective-item" data-id="5">
+                  <div class="obj-checkbox" role="checkbox" aria-checked="false" tabindex="0">
+                    <span class="check-mark">✔</span>
+                  </div>
+                  <div class="obj-content">
+                    <span class="obj-label">OBJECTIVE 5:</span>
+                    <span class="obj-text">Never Run Out of Reasons to Smile</span>
+                  </div>
+                  <span class="obj-status">Ready</span>
+                </li>
+              </ul>
+              <div class="objective-quick-tip">Tip: Tap each objective to check it off!</div>
+            </div>
+
+            <!-- Playful Rewards Section -->
+            <div class="quest-rewards-block">
+              <h3 class="rewards-heading">
+                <span class="heading-icon">🎁</span> Quest Rewards
+              </h3>
+              <div class="rewards-grid">
+                <!-- Reward 1 -->
+                <div class="reward-item" title="100 Primogems (Birthday Edition)">
+                  <div class="reward-icon-wrap primo-icon">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                      <polygon points="12,2 17,9 22,12 17,15 12,22 7,15 2,12 7,9" fill="#ff70a6" stroke="#ffd166" stroke-width="1.5"/>
+                      <polygon points="12,5 15,10 18,12 15,14 12,19 9,14 6,12 9,10" fill="#70d6ff" opacity="0.8"/>
+                    </svg>
+                  </div>
+                  <div class="reward-count">×100</div>
+                  <div class="reward-name">Primogems (Birthday Edition)</div>
+                </div>
+
+                <!-- Reward 2 -->
+                <div class="reward-item" title="5 Intertwined Fates">
+                  <div class="reward-icon-wrap fate-icon">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                      <circle cx="12" cy="12" r="10" fill="url(#fateGrad)" stroke="#ffd700" stroke-width="1.5"/>
+                      <polygon points="12,4 14,10 20,12 14,14 12,20 10,14 4,12 10,10" fill="#ffffff" opacity="0.9"/>
+                      <defs>
+                        <radialGradient id="fateGrad" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stop-color="#ffb703"/>
+                          <stop offset="60%" stop-color="#c77dff"/>
+                          <stop offset="100%" stop-color="#4361ee"/>
+                        </radialGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <div class="reward-count">×5</div>
+                  <div class="reward-name">Intertwined Fates</div>
+                </div>
+
+                <!-- Reward 3 -->
+                <div class="reward-item" title="999 Good Luck">
+                  <div class="reward-icon-wrap luck-icon">
+                    <span class="custom-icon">🍀</span>
+                  </div>
+                  <div class="reward-count">×999</div>
+                  <div class="reward-name">Good Luck</div>
+                </div>
+
+                <!-- Reward 4 -->
+                <div class="reward-item" title="Unlimited Happiness">
+                  <div class="reward-icon-wrap happy-icon">
+                    <span class="custom-icon">✨</span>
+                  </div>
+                  <div class="reward-count">∞</div >
+                  <div class="reward-name">Unlimited Happiness</div>
+                </div>
+
+                <!-- Reward 5 -->
+                <div class="reward-item" title="1 Special Birthday Bouquet">
+                  <div class="reward-icon-wrap bouquet-icon">
+                    <span class="custom-icon">💐</span>
+                  </div>
+                  <div class="reward-count">×1</div>
+                  <div class="reward-name">Birthday Bouquet</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Claim Button -->
+            <div class="quest-action-wrap">
+              <button id="btn-claim-quest" class="btn-genshin btn-claim-quest" aria-label="Claim Quest Rewards">
+                <span class="btn-shine"></span>
+                <span class="btn-icon">✨</span>
+                <span class="btn-text">CLAIM QUEST REWARDS</span>
+                <span class="btn-icon">✨</span>
+              </button>
+            </div>
+
+            <!-- Paimon Commentary Speech Bubble -->
+            <div class="paimon-commentary" data-aos="fade-up">
+              <div class="paimon-avatar">
+                <div class="paimon-crown">👑</div>
+                <div class="paimon-face">
+                  <span class="paimon-eyes">◕‿◕</span>
+                </div>
+                <div class="paimon-halo">✧</div>
+              </div>
+              <div class="paimon-dialogue-box">
+                <div class="paimon-speaker">Paimon Says:</div>
+                <p class="paimon-text">
+                  "Hey! Don't forget to enjoy your birthday! Paimon says this event is too special to skip!"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quest Completed Modal Overlay -->
+    <div id="quest-modal" class="genshin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-quest-title">
+      <div class="genshin-modal-box">
+        <div class="quest-complete-flare"></div>
+        <div class="quest-complete-badge">
+          <span class="complete-star">★ ★ ★ ★ ★</span>
+          <h2 id="modal-quest-title" class="quest-complete-title">QUEST COMPLETED!</h2>
+          <div class="quest-complete-sub">Happy Birthday, Win!</div>
+        </div>
+        <div class="modal-rewards-display">
+          <div class="modal-reward-badge">✨ 100 Primogems Added to Your Birthday Stash!</div>
+          <div class="modal-reward-badge">🌟 5 Intertwined Fates for Golden Wishes!</div>
+          <div class="modal-reward-badge">🍀 999 Good Luck & Boundless Joy Activated!</div>
+        </div>
+        <button id="btn-close-quest-modal" class="btn-genshin btn-close-modal">
+          <span class="btn-text">CONTINUE JOURNEY</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==============================================
+         4. FLOWER GARDEN – A BOUQUET FOR WIN
+         ============================================== -->
+    <section id="flower-garden" class="garden-section section-padding">
+      <div class="container">
+        <div class="section-heading text-center" data-aos="fade-down">
+          <span class="section-tag-gold">✦ BOTANICAL BLESSINGS ✦</span>
+          <h2 class="section-title">A Little Garden of Birthday Wishes</h2>
+          <p class="section-subtitle">
+            "Like flowers that bloom in their own time, may you continue growing, discovering new things, and enjoying every beautiful moment life brings."
+          </p>
+        </div>
+
+        <!-- Centerpiece Blooming Bouquet Interactive Showcase -->
+        <div class="garden-showcase-wrap" data-aos="zoom-in">
+          <div class="garden-ambient-fireflies">
+            <span class="firefly f1"></span>
+            <span class="firefly f2"></span>
+            <span class="firefly f3"></span>
+            <span class="firefly f4"></span>
+            <span class="firefly f5"></span>
+          </div>
+
+          <!-- Large Master SVG Illustrated Blooming Bouquet -->
+          <div class="master-bouquet-container" id="interactive-bouquet" role="region" aria-label="Animated Blooming Birthday Bouquet">
+            <svg class="master-bouquet-svg" viewBox="0 0 500 520" width="100%" height="auto">
+              <defs>
+                <!-- Gradients for realistic flower petals -->
+                <radialGradient id="roseGrad" cx="40%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="#ff758f"/>
+                  <stop offset="60%" stop-color="#e63946"/>
+                  <stop offset="100%" stop-color="#9d0208"/>
+                </radialGradient>
+                <linearGradient id="tulipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffb3c6"/>
+                  <stop offset="50%" stop-color="#ff4d6d"/>
+                  <stop offset="100%" stop-color="#c9184a"/>
+                </linearGradient>
+                <linearGradient id="sunflowerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffe600"/>
+                  <stop offset="60%" stop-color="#ffb703"/>
+                  <stop offset="100%" stop-color="#fb8500"/>
+                </linearGradient>
+                <linearGradient id="lavenderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#e0aaff"/>
+                  <stop offset="50%" stop-color="#9d4edd"/>
+                  <stop offset="100%" stop-color="#5a189a"/>
+                </linearGradient>
+                <radialGradient id="daisyGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="75%" stop-color="#f8f9fa"/>
+                  <stop offset="100%" stop-color="#dee2e6"/>
+                </radialGradient>
+                <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#52b788"/>
+                  <stop offset="50%" stop-color="#2d6a4f"/>
+                  <stop offset="100%" stop-color="#1b4332"/>
+                </linearGradient>
+                <linearGradient id="wrapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffcad4"/>
+                  <stop offset="50%" stop-color="#f4acb7"/>
+                  <stop offset="100%" stop-color="#d8e2dc"/>
+                </linearGradient>
+                <filter id="bloomGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+              </defs>
+
+              <!-- Bouquet Stems and Wrapping -->
+              <g class="bouquet-stems">
+                <!-- Stems -->
+                <line x1="250" y1="280" x2="220" y2="460" stroke="url(#stemGrad)" stroke-width="7" stroke-linecap="round"/>
+                <line x1="250" y1="280" x2="250" y2="470" stroke="url(#stemGrad)" stroke-width="8" stroke-linecap="round"/>
+                <line x1="250" y1="280" x2="280" y2="460" stroke="url(#stemGrad)" stroke-width="7" stroke-linecap="round"/>
+                <line x1="250" y1="280" x2="200" y2="440" stroke="url(#stemGrad)" stroke-width="5" stroke-linecap="round"/>
+                <line x1="250" y1="280" x2="300" y2="445" stroke="url(#stemGrad)" stroke-width="5" stroke-linecap="round"/>
+
+                <!-- Delicate Kraft Wrap & Satin Ribbon -->
+                <polygon points="180,310 320,310 275,470 225,470" fill="url(#wrapGrad)" opacity="0.95" stroke="#f08080" stroke-width="2"/>
+                <!-- Ribbon Bow -->
+                <path d="M225 360 C205 345 190 380 230 375 Z" fill="#ffd166" stroke="#fb8500" stroke-width="2"/>
+                <path d="M275 360 C295 345 310 380 270 375 Z" fill="#ffd166" stroke="#fb8500" stroke-width="2"/>
+                <circle cx="250" cy="370" r="10" fill="#f77f00" stroke="#d62828" stroke-width="2"/>
+                <!-- Ribbon tails -->
+                <path d="M246 378 Q235 420 220 445" stroke="#fb8500" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M254 378 Q265 420 280 445" stroke="#fb8500" stroke-width="4" fill="none" stroke-linecap="round"/>
+              </g>
+
+              <!-- Foliage & Eucalyptus Leaves -->
+              <g class="bouquet-leaves">
+                <!-- Fern/Eucalyptus left -->
+                <path d="M230 260 C170 230 130 190 100 130 C120 180 160 210 210 240 Z" fill="#74c69d" opacity="0.9"/>
+                <circle cx="100" cy="130" r="9" fill="#95d5b2"/>
+                <circle cx="120" cy="155" r="11" fill="#95d5b2"/>
+                <circle cx="145" cy="180" r="13" fill="#74c69d"/>
+
+                <!-- Fern/Eucalyptus right -->
+                <path d="M270 260 C330 230 370 190 400 130 C380 180 340 210 290 240 Z" fill="#74c69d" opacity="0.9"/>
+                <circle cx="400" cy="130" r="9" fill="#95d5b2"/>
+                <circle cx="380" cy="155" r="11" fill="#95d5b2"/>
+                <circle cx="355" cy="180" r="13" fill="#74c69d"/>
+              </g>
+
+              <!-- Central Blooming Flowers -->
+              <!-- 1. SUNFLOWER (Center-Right) -->
+              <g class="flower-group flower-sunflower" transform="translate(290, 190)">
+                <g class="sunflower-petals">
+                  <!-- 12 Petals around -->
+                  <ellipse cx="0" cy="-35" rx="9" ry="24" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="25" cy="-25" rx="9" ry="24" transform="rotate(30 25 -25)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="35" cy="0" rx="9" ry="24" transform="rotate(60 35 0)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="35" cy="0" rx="9" ry="24" transform="rotate(90 35 0)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="25" cy="25" rx="9" ry="24" transform="rotate(120 25 25)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="0" cy="35" rx="9" ry="24" transform="rotate(150 0 35)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="-25" cy="25" rx="9" ry="24" transform="rotate(210 -25 25)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="-35" cy="0" rx="9" ry="24" transform="rotate(240 -35 0)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="-35" cy="0" rx="9" ry="24" transform="rotate(270 -35 0)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="-25" cy="-25" rx="9" ry="24" transform="rotate(300 -25 -25)" fill="url(#sunflowerGrad)"/>
+                  <ellipse cx="-15" cy="-30" rx="9" ry="24" transform="rotate(330 -15 -30)" fill="url(#sunflowerGrad)"/>
+                </g>
+                <!-- Center disk -->
+                <circle cx="0" cy="0" r="22" fill="#582f0e" stroke="#7f4f24" stroke-width="3"/>
+                <circle cx="0" cy="0" r="16" fill="#3a1d07"/>
+                <circle cx="0" cy="0" r="8" fill="#281103" stroke="#e85d04" stroke-width="1" stroke-dasharray="2,2"/>
+              </g>
+
+              <!-- 2. NOBLE ROSE (Center-Top) -->
+              <g class="flower-group flower-rose" transform="translate(230, 150)" filter="url(#bloomGlow)">
+                <!-- Rose layered petals -->
+                <circle cx="0" cy="0" r="38" fill="url(#roseGrad)"/>
+                <!-- Outer petals -->
+                <path d="M-30 -10 C-35 -30 -10 -40 10 -35 C30 -30 35 -10 25 15 C15 35 -15 35 -30 -10 Z" fill="#ff4d6d" opacity="0.85"/>
+                <path d="M-20 -25 C-10 -38 20 -38 28 -20 C35 -5 20 25 0 28 C-20 25 -30 0 -20 -25 Z" fill="#e63946"/>
+                <!-- Inner swirl -->
+                <path d="M-15 -10 C-10 -22 15 -22 18 -10 C20 5 10 15 -5 16 C-18 16 -18 0 -15 -10 Z" fill="#ff758f"/>
+                <circle cx="0" cy="0" r="9" fill="#9d0208"/>
+                <path d="M-4 -3 Q0 -7 4 -3 Q0 2 -4 -3" fill="#ffe3e3"/>
+              </g>
+
+              <!-- 3. PINK TULIP (Left) -->
+              <g class="flower-group flower-tulip" transform="translate(160, 190)">
+                <!-- Left petal -->
+                <path d="M-22 25 C-35 0 -25 -30 -5 -40 C-10 -15 -5 10 -22 25 Z" fill="url(#tulipGrad)"/>
+                <!-- Right petal -->
+                <path d="M22 25 C35 0 25 -30 5 -40 C10 -15 5 10 22 25 Z" fill="url(#tulipGrad)"/>
+                <!-- Center petal -->
+                <path d="M-16 25 C-20 -15 -5 -45 0 -48 C5 -45 20 -15 16 25 Z" fill="#ff758f"/>
+                <path d="M-6 25 C-8 0 0 -35 0 -38 C0 -35 8 0 6 25 Z" fill="#ffccd5"/>
+              </g>
+
+              <!-- 4. WHITE DAISY (Center Bottom) -->
+              <g class="flower-group flower-daisy" transform="translate(225, 235)">
+                <!-- White petals radiating -->
+                <ellipse cx="0" cy="-26" rx="6" ry="16" fill="url(#daisyGrad)"/>
+                <ellipse cx="18" cy="-18" rx="6" ry="16" transform="rotate(45 18 -18)" fill="url(#daisyGrad)"/>
+                <ellipse cx="26" cy="0" rx="6" ry="16" transform="rotate(90 26 0)" fill="url(#daisyGrad)"/>
+                <ellipse cx="18" cy="18" rx="6" ry="16" transform="rotate(135 18 18)" fill="url(#daisyGrad)"/>
+                <ellipse cx="0" cy="26" rx="6" ry="16" fill="url(#daisyGrad)"/>
+                <ellipse cx="-18" cy="18" rx="6" ry="16" transform="rotate(225 -18 18)" fill="url(#daisyGrad)"/>
+                <ellipse cx="-26" cy="0" rx="6" ry="16" transform="rotate(270 -26 0)" fill="url(#daisyGrad)"/>
+                <ellipse cx="-18" cy="-18" rx="6" ry="16" transform="rotate(315 -18 -18)" fill="url(#daisyGrad)"/>
+                <!-- Golden sunny center -->
+                <circle cx="0" cy="0" r="11" fill="#ffb703" stroke="#fb8500" stroke-width="1.5"/>
+                <circle cx="0" cy="0" r="5" fill="#ffd166"/>
+              </g>
+
+              <!-- 5. LAVENDER SPRIGS (Sprouting on top-left and top-right) -->
+              <g class="flower-group flower-lavender" transform="translate(170, 110)">
+                <line x1="0" y1="60" x2="0" y2="0" stroke="#52b788" stroke-width="3"/>
+                <!-- Lavender florets -->
+                <ellipse cx="-6" cy="5" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="6" cy="5" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-5" cy="15" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="5" cy="15" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-5" cy="25" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="5" cy="25" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-4" cy="35" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="4" cy="35" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="0" cy="-2" rx="4" ry="4" fill="#c77dff"/>
+              </g>
+
+              <g class="flower-group flower-lavender" transform="translate(340, 120)">
+                <line x1="0" y1="60" x2="-10" y2="0" stroke="#52b788" stroke-width="3"/>
+                <!-- Lavender florets -->
+                <ellipse cx="-14" cy="5" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-4" cy="5" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-13" cy="15" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-3" cy="15" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-12" cy="25" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-2" cy="25" rx="5" ry="3" fill="url(#lavenderGrad)"/>
+                <ellipse cx="-10" cy="-3" rx="4" ry="4" fill="#c77dff"/>
+              </g>
+
+              <!-- Floating Pollen & Sparkles -->
+              <g class="sparkles">
+                <circle cx="210" cy="120" r="3" fill="#fff" opacity="0.9"/>
+                <circle cx="310" cy="140" r="2.5" fill="#ffd700" opacity="0.9"/>
+                <circle cx="160" cy="240" r="2" fill="#fff" opacity="0.8"/>
+                <circle cx="340" cy="230" r="3" fill="#ffb703" opacity="0.9"/>
+                <text x="140" y="90" fill="#e0aaff" font-size="14">✦</text>
+                <text x="350" y="80" fill="#ffd166" font-size="14">✧</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Interactive Individual Flower Cards -->
+        <div class="flower-cards-grid">
+          <!-- Card 1: Rose -->
+          <div class="flower-card" data-flower="rose" data-aos="fade-up" data-aos-delay="100">
+            <div class="flower-card-art">
+              <span class="flower-emoji">🌹</span>
+            </div>
+            <h3 class="flower-card-name">Velvet Rose</h3>
+            <span class="flower-card-meaning">Grace & Vitality</span>
+            <p class="flower-card-blessing">
+              "May your days bloom with confidence, strength, and the radiant elegance of someone who knows how special she is."
+            </p>
+            <button class="btn-bloom" aria-label="Bloom Velvet Rose">
+              <span>Touch to Bloom</span> ✦
+            </button>
+          </div>
+
+          <!-- Card 2: Pink Tulip -->
+          <div class="flower-card" data-flower="tulip" data-aos="fade-up" data-aos-delay="150">
+            <div class="flower-card-art">
+              <span class="flower-emoji">🌷</span>
+            </div>
+            <h3 class="flower-card-name">Spring Tulip</h3>
+            <span class="flower-card-meaning">Fresh Beginnings</span>
+            <p class="flower-card-blessing">
+              "Here's to new seasons, new hopes, and the bright optimism that accompanies every fresh step forward."
+            </p>
+            <button class="btn-bloom" aria-label="Bloom Spring Tulip">
+              <span>Touch to Bloom</span> ✦
+            </button>
+          </div>
+
+          <!-- Card 3: Daisy -->
+          <div class="flower-card" data-flower="daisy" data-aos="fade-up" data-aos-delay="200">
+            <div class="flower-card-art">
+              <span class="flower-emoji">🌼</span>
+            </div>
+            <h3 class="flower-card-name">White Daisy</h3>
+            <span class="flower-card-meaning">Cheerfulness & Peace</span>
+            <p class="flower-card-blessing">
+              "May simple joys always find you—a warm breeze, clear skies, and a cheerful heart in every little moment."
+            </p>
+            <button class="btn-bloom" aria-label="Bloom White Daisy">
+              <span>Touch to Bloom</span> ✦
+            </button>
+          </div>
+
+          <!-- Card 4: Lavender -->
+          <div class="flower-card" data-flower="lavender" data-aos="fade-up" data-aos-delay="250">
+            <div class="flower-card-art">
+              <span class="flower-emoji">🪻</span>
+            </div>
+            <h3 class="flower-card-name">Fragrant Lavender</h3>
+            <span class="flower-card-meaning">Serenity & Calm</span>
+            <p class="flower-card-blessing">
+              "Whenever adventure gets tiring, may you always find cozy resting spots, restful sleep, and gentle peace of mind."
+            </p>
+            <button class="btn-bloom" aria-label="Bloom Fragrant Lavender">
+              <span>Touch to Bloom</span> ✦
+            </button>
+          </div>
+
+          <!-- Card 5: Sunflower -->
+          <div class="flower-card" data-flower="sunflower" data-aos="fade-up" data-aos-delay="300">
+            <div class="flower-card-art">
+              <span class="flower-emoji">🌻</span>
+            </div>
+            <h3 class="flower-card-name">Golden Sunflower</h3>
+            <span class="flower-card-meaning">Sunlight & Adventure</span>
+            <p class="flower-card-blessing">
+              "Stand tall, follow the sun, and let your adventurous energy light up every trail and path you walk upon!"
+            </p>
+            <button class="btn-bloom" aria-label="Bloom Golden Sunflower">
+              <span>Touch to Bloom</span> ✦
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         5. REAL-LIFE ADVENTURE SECTION – BEYOND TEYVAT
+         ============================================== -->
+    <section id="real-adventures" class="adventures-section section-padding">
+      <div class="container">
+        <div class="section-heading text-center" data-aos="fade-down">
+          <span class="section-tag-gold">✦ REAL-LIFE WORLD EXPLORATION ✦</span>
+          <h2 class="section-title">YOUR NEXT ADVENTURE AWAITS!</h2>
+          <p class="section-subtitle">
+            "Teyvat is not the only world worth exploring. There's a whole world out there waiting to be discovered!"
+          </p>
+        </div>
+
+        <div class="adventure-cards-grid">
+          <!-- A. HIKING ADVENTURE -->
+          <div class="adventure-card card-hiking" data-aos="fade-up" data-aos-delay="100">
+            <div class="adventure-card-art">
+              <div class="adventure-badge">HIKING EXPEDITION</div>
+              <div class="adventure-scene hiking-scene">
+                <!-- Illustrated Mountain Scenery -->
+                <svg viewBox="0 0 320 180" class="scene-svg">
+                  <defs>
+                    <linearGradient id="skyHike" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#ffafcc"/>
+                      <stop offset="60%" stop-color="#bde0fe"/>
+                      <stop offset="100%" stop-color="#a2d2ff"/>
+                    </linearGradient>
+                    <linearGradient id="mtnGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#6c757d"/>
+                      <stop offset="100%" stop-color="#343a40"/>
+                    </linearGradient>
+                    <linearGradient id="mtnGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#52b788"/>
+                      <stop offset="100%" stop-color="#1b4332"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="320" height="180" fill="url(#skyHike)"/>
+                  <circle cx="260" cy="50" r="26" fill="#ffe6a7" opacity="0.8"/>
+                  <!-- Distant Peaks -->
+                  <polygon points="40,180 140,50 220,180" fill="url(#mtnGrad1)"/>
+                  <polygon points="125,70 140,50 155,70 148,78 140,73 132,78" fill="#ffffff"/>
+                  <!-- Near Green Peaks -->
+                  <polygon points="-20,180 80,80 190,180" fill="url(#mtnGrad2)" opacity="0.9"/>
+                  <polygon points="160,180 250,90 340,180" fill="url(#mtnGrad2)"/>
+                  <!-- Hiking Trail Path -->
+                  <path d="M80 180 Q140 145 150 130 T200 105" stroke="#f4a261" stroke-width="4" stroke-dasharray="4,3" fill="none"/>
+                  <!-- Pine Trees -->
+                  <polygon points="50,160 55,145 60,160" fill="#1b4332"/>
+                  <polygon points="70,165 76,148 82,165" fill="#1b4332"/>
+                  <polygon points="280,160 286,145 292,160" fill="#1b4332"/>
+                </svg>
+              </div>
+              <div class="adventure-icon-floating">🥾</div>
+            </div>
+
+            <div class="adventure-card-body">
+              <h3 class="adventure-title">Into the Mountains</h3>
+              <p class="adventure-desc">
+                "New trails, fresh air, beautiful views, and memories waiting to be made. May every climb bring you closer to amazing discoveries."
+              </p>
+
+              <div class="genshin-achievement-pill">
+                <div class="pill-header">
+                  <span class="pill-star">✦</span>
+                  <span class="pill-title">Achievement Unlocked: The Mountains Are Calling!</span>
+                </div>
+                <p class="pill-sub">
+                  "Successfully climbed a mountain without using a teleport waypoint."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- B. RUNNING ADVENTURE -->
+          <div class="adventure-card card-running" data-aos="fade-up" data-aos-delay="200">
+            <div class="adventure-card-art">
+              <div class="adventure-badge">RUNNING COMMISSION</div>
+              <div class="adventure-scene running-scene">
+                <!-- Illustrated Running Park Trail -->
+                <svg viewBox="0 0 320 180" class="scene-svg">
+                  <defs>
+                    <linearGradient id="skyRun" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#ffd166"/>
+                      <stop offset="50%" stop-color="#f78c6b"/>
+                      <stop offset="100%" stop-color="#8338ec"/>
+                    </linearGradient>
+                    <linearGradient id="trackGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#e76f51"/>
+                      <stop offset="100%" stop-color="#f4a261"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="320" height="180" fill="url(#skyRun)"/>
+                  <circle cx="60" cy="50" r="30" fill="#fff3b0" opacity="0.85"/>
+                  <!-- Green Park Grass -->
+                  <path d="M0 110 Q160 80 320 110 L320 180 L0 180 Z" fill="#52b788"/>
+                  <!-- Athletic Track Curve -->
+                  <path d="M-20 180 C80 150 140 130 340 130" stroke="url(#trackGrad)" stroke-width="32" fill="none"/>
+                  <path d="M-20 180 C80 150 140 130 340 130" stroke="#ffffff" stroke-width="2" stroke-dasharray="10,8" fill="none"/>
+                  <!-- Speed wind lines -->
+                  <line x1="200" y1="90" x2="280" y2="90" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+                  <line x1="230" y1="105" x2="295" y2="105" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+                  <line x1="180" y1="75" x2="250" y2="75" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                </svg>
+              </div>
+              <div class="adventure-icon-floating">🏃‍♀️</div>
+            </div>
+
+            <div class="adventure-card-body">
+              <h3 class="adventure-title">One Step at a Time</h3>
+              <p class="adventure-desc">
+                "Every step is a little adventure. May you always find the motivation to keep moving, enjoy the journey, and celebrate every milestone."
+              </p>
+
+              <div class="genshin-achievement-pill">
+                <div class="pill-header">
+                  <span class="pill-star">✦</span>
+                  <span class="pill-title">Daily Commission: Complete Your Running Route</span>
+                </div>
+                <p class="pill-sub">
+                  "Outran the Hilichurls without using stamina food."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- C. PICKLEBALL ADVENTURE -->
+          <div class="adventure-card card-pickleball" data-aos="fade-up" data-aos-delay="300">
+            <div class="adventure-card-art">
+              <div class="adventure-badge">COURT MASTERY</div>
+              <div class="adventure-scene pickleball-scene">
+                <!-- Illustrated Pickleball Court & Paddle -->
+                <svg viewBox="0 0 320 180" class="scene-svg">
+                  <defs>
+                    <linearGradient id="courtSky" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#4cc9f0"/>
+                      <stop offset="100%" stop-color="#4895ef"/>
+                    </linearGradient>
+                    <linearGradient id="courtSurf" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#2a9d8f"/>
+                      <stop offset="100%" stop-color="#264653"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="320" height="180" fill="url(#courtSky)"/>
+                  <!-- Court Surface -->
+                  <polygon points="0,180 40,80 280,80 320,180" fill="url(#courtSurf)"/>
+                  <!-- White Court Lines -->
+                  <polygon points="20,175 55,85 265,85 300,175" fill="none" stroke="#ffffff" stroke-width="3"/>
+                  <line x1="160" y1="85" x2="160" y2="175" stroke="#ffffff" stroke-width="2"/>
+                  <!-- Net -->
+                  <line x1="30" y1="125" x2="290" y2="125" stroke="#ffffff" stroke-width="4"/>
+                  <line x1="30" y1="125" x2="30" y2="105" stroke="#333" stroke-width="4"/>
+                  <line x1="290" y1="125" x2="290" y2="105" stroke="#333" stroke-width="4"/>
+                  <rect x="30" y="105" width="260" height="20" fill="rgba(255,255,255,0.4)" stroke="#fff" stroke-width="1"/>
+                  <!-- Neon Pickleball & Paddle -->
+                  <g transform="translate(190, 45)">
+                    <!-- Paddle -->
+                    <rect x="0" y="0" width="45" height="60" rx="10" fill="#f72585" stroke="#7209b7" stroke-width="3" transform="rotate(-20)"/>
+                    <rect x="18" y="55" width="10" height="30" rx="3" fill="#3a0ca3" transform="rotate(-20)"/>
+                    <!-- Perforated Pickleball -->
+                    <circle cx="65" cy="15" r="14" fill="#ccff00" stroke="#9ef01a" stroke-width="2"/>
+                    <circle cx="60" cy="12" r="2.5" fill="#70e000"/>
+                    <circle cx="68" cy="10" r="2.5" fill="#70e000"/>
+                    <circle cx="66" cy="18" r="2.5" fill="#70e000"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="adventure-icon-floating">🏓</div>
+            </div>
+
+            <div class="adventure-card-body">
+              <h3 class="adventure-title">Let's Play Some Pickleball!</h3>
+              <p class="adventure-desc">
+                "New skills, fun rallies, friendly competition, and plenty of reasons to laugh. May every game bring good memories and exciting experiences."
+              </p>
+
+              <div class="genshin-achievement-pill">
+                <div class="pill-header">
+                  <span class="pill-star">✦</span>
+                  <span class="pill-title">Combat Talent Unlocked: Paddle Mastery!</span>
+                </div>
+                <p class="pill-sub">
+                  "Defeated the opponent with a perfectly timed shot. No Elemental Burst required."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- D. MORE ADVENTURES TO COME -->
+          <div class="adventure-card card-exploration" data-aos="fade-up" data-aos-delay="400">
+            <div class="adventure-card-art">
+              <div class="adventure-badge">OPEN HORIZON</div>
+              <div class="adventure-scene exploration-scene">
+                <!-- Illustrated Open Road & Sky -->
+                <svg viewBox="0 0 320 180" class="scene-svg">
+                  <defs>
+                    <linearGradient id="skyExp" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#b5179e"/>
+                      <stop offset="40%" stop-color="#7209b7"/>
+                      <stop offset="80%" stop-color="#f72585"/>
+                      <stop offset="100%" stop-color="#4cc9f0"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="320" height="180" fill="url(#skyExp)"/>
+                  <circle cx="160" cy="90" r="38" fill="#ffd166" opacity="0.9"/>
+                  <!-- Endless Open Highway to Mountains -->
+                  <polygon points="0,180 145,95 175,95 320,180" fill="#2b2d42"/>
+                  <polygon points="157,95 163,95 163,180 157,180" fill="#ffd166"/>
+                  <!-- Floating Compass Rose -->
+                  <g transform="translate(250, 40)" opacity="0.85">
+                    <circle cx="0" cy="0" r="24" fill="rgba(0,0,0,0.3)" stroke="#ffd700" stroke-width="2"/>
+                    <polygon points="0,-18 5,-5 18,0 5,5 0,18 -5,5 -18,0 -5,-5" fill="#ffd700"/>
+                    <circle cx="0" cy="0" r="3" fill="#e63946"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="adventure-icon-floating">🧭</div>
+            </div>
+
+            <div class="adventure-card-body">
+              <h3 class="adventure-title">The World Is Your Playground</h3>
+              <p class="adventure-desc">
+                "May there always be new places to explore, new activities to try, and new experiences waiting around the corner."
+              </p>
+
+              <div class="genshin-achievement-pill">
+                <div class="pill-header">
+                  <span class="pill-star">✦</span>
+                  <span class="pill-title">New Region Discovered!</span>
+                </div>
+                <p class="pill-sub">
+                  "100% Exploration Progress: Real Life Edition."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         6. ADVENTURE ACHIEVEMENTS – REAL LIFE EDITION
+         ============================================== -->
+    <section id="achievements" class="achievements-section section-padding">
+      <div class="container">
+        <div class="section-heading text-center" data-aos="fade-down">
+          <span class="section-tag-gold">✦ WONDERS OF THE WORLD ✦</span>
+          <h2 class="section-title">ACHIEVEMENTS WAITING TO BE UNLOCKED</h2>
+          <p class="section-subtitle">
+            "Fun birthday-themed aspirations for an incredible year of discovery, laughter, and personal triumphs."
+          </p>
+        </div>
+
+        <!-- Total Primogem Tracker -->
+        <div class="primo-tracker-bar" data-aos="zoom-in">
+          <span class="tracker-label">Achievement Rewards Available:</span>
+          <span class="tracker-val" id="achievement-primo-count">
+            <span class="primo-icon-mini">💎</span> <span id="primo-total">0</span> / 60 Primogems
+          </span>
+          <span class="tracker-hint">(Click each achievement below to unlock!)</span>
+        </div>
+
+        <div class="achievements-list-grid">
+          <!-- Achievement 1 -->
+          <div class="achievement-card" data-id="1" tabindex="0" role="button" aria-label="Unlock Mountain Explorer Achievement">
+            <div class="achieve-icon-box">
+              <span class="achieve-medal">🏔️</span>
+              <span class="achieve-glow"></span>
+            </div>
+            <div class="achieve-info">
+              <div class="achieve-top-row">
+                <h3 class="achieve-title">Mountain Explorer</h3>
+                <span class="achieve-badge-status">Achievement Available!</span>
+              </div>
+              <p class="achieve-desc">Successfully conquered a new hiking trail.</p>
+              <div class="achieve-progress-line"><div class="progress-fill"></div></div>
+            </div>
+            <div class="achieve-claim-action">
+              <div class="achieve-reward-primo">
+                <span class="primo-mini">💎</span> +10
+              </div>
+              <button class="btn-claim-single">Unlock</button>
+            </div>
+          </div>
+
+          <!-- Achievement 2 -->
+          <div class="achievement-card" data-id="2" tabindex="0" role="button" aria-label="Unlock Speed of the Wind Achievement">
+            <div class="achieve-icon-box">
+              <span class="achieve-medal">💨</span>
+              <span class="achieve-glow"></span>
+            </div>
+            <div class="achieve-info">
+              <div class="achieve-top-row">
+                <h3 class="achieve-title">Speed of the Wind</h3>
+                <span class="achieve-badge-status">Achievement Available!</span>
+              </div>
+              <p class="achieve-desc">Completed a memorable running session.</p>
+              <div class="achieve-progress-line"><div class="progress-fill"></div></div>
+            </div>
+            <div class="achieve-claim-action">
+              <div class="achieve-reward-primo">
+                <span class="primo-mini">💎</span> +10
+              </div>
+              <button class="btn-claim-single">Unlock</button>
+            </div>
+          </div>
+
+          <!-- Achievement 3 -->
+          <div class="achievement-card" data-id="3" tabindex="0" role="button" aria-label="Unlock Paddle Legend Achievement">
+            <div class="achieve-icon-box">
+              <span class="achieve-medal">⚡</span>
+              <span class="achieve-glow"></span>
+            </div>
+            <div class="achieve-info">
+              <div class="achieve-top-row">
+                <h3 class="achieve-title">Paddle Legend</h3>
+                <span class="achieve-badge-status">Achievement Available!</span>
+              </div>
+              <p class="achieve-desc">Mastered a new pickleball skill.</p>
+              <div class="achieve-progress-line"><div class="progress-fill"></div></div>
+            </div>
+            <div class="achieve-claim-action">
+              <div class="achieve-reward-primo">
+                <span class="primo-mini">💎</span> +10
+              </div>
+              <button class="btn-claim-single">Unlock</button>
+            </div>
+          </div>
+
+          <!-- Achievement 4 -->
+          <div class="achievement-card" data-id="4" tabindex="0" role="button" aria-label="Unlock Nature's Best Friend Achievement">
+            <div class="achieve-icon-box">
+              <span class="achieve-medal">🌿</span>
+              <span class="achieve-glow"></span>
+            </div>
+            <div class="achieve-info">
+              <div class="achieve-top-row">
+                <h3 class="achieve-title">Nature's Best Friend</h3>
+                <span class="achieve-badge-status">Achievement Available!</span>
+              </div>
+              <p class="achieve-desc">Discovered a beautiful outdoor destination.</p>
+              <div class="achieve-progress-line"><div class="progress-fill"></div></div>
+            </div>
+            <div class="achieve-claim-action">
+              <div class="achieve-reward-primo">
+                <span class="primo-mini">💎</span> +10
+              </div>
+              <button class="btn-claim-single">Unlock</button>
+            </div>
+          </div>
+
+          <!-- Achievement 5 -->
+          <div class="achievement-card" data-id="5" tabindex="0" role="button" aria-label="Unlock Collector of Memories Achievement">
+            <div class="achieve-icon-box">
+              <span class="achieve-medal">📸</span>
+              <span class="achieve-glow"></span>
+            </div>
+            <div class="achieve-info">
+              <div class="achieve-top-row">
+                <h3 class="achieve-title">Collector of Memories</h3>
+                <span class="achieve-badge-status">Achievement Available!</span>
+              </div>
+              <p class="achieve-desc">Created unforgettable experiences.</p>
+              <div class="achieve-progress-line"><div class="progress-fill"></div></div>
+            </div>
+            <div class="achieve-claim-action">
+              <div class="achieve-reward-primo">
+                <span class="primo-mini">💎</span> +10
+              </div>
+              <button class="btn-claim-single">Unlock</button>
+            </div>
+          </div>
+
+          <!-- Achievement 6 -->
+          <div class="achievement-card" data-id="6" tabindex="0" role="button" aria-label="Unlock The Adventurer's Spirit Achievement">
+            <div class="achieve-icon-box">
+              <span class="achieve-medal">🌟</span>
+              <span class="achieve-glow"></span>
+            </div>
+            <div class="achieve-info">
+              <div class="achieve-top-row">
+                <h3 class="achieve-title">The Adventurer's Spirit</h3>
+                <span class="achieve-badge-status">Achievement Available!</span>
+              </div>
+              <p class="achieve-desc">Never stopped being curious about the world.</p>
+              <div class="achieve-progress-line"><div class="progress-fill"></div></div>
+            </div>
+            <div class="achieve-claim-action">
+              <div class="achieve-reward-primo">
+                <span class="primo-mini">💎</span> +10
+              </div>
+              <button class="btn-claim-single">Unlock</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         7. FUNNY GENSHIN IMPACT MEMES AND REFERENCES
+         ============================================== -->
+    <section id="teyvat-bulletin" class="memes-section section-padding">
+      <div class="container">
+        <div class="section-heading text-center" data-aos="fade-down">
+          <span class="section-tag-gold">✦ ADVENTURERS' GUILD NOTICE BOARD ✦</span>
+          <h2 class="section-title">IMPORTANT ADVENTURER ANNOUNCEMENTS</h2>
+          <p class="section-subtitle">
+            "Official decrees and humorous observations from fellow Travelers across Teyvat."
+          </p>
+        </div>
+
+        <div class="memes-grid">
+          <!-- Meme 1 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="50">
+            <div class="meme-header">
+              <span class="meme-number">#01</span>
+              <span class="meme-icon">⚔️</span>
+            </div>
+            <p class="meme-quote">
+              "Artifact farming is temporary. Birthday happiness is permanent."
+            </p>
+            <div class="meme-tag">Domain of Blessings</div>
+          </div>
+
+          <!-- Meme 2 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="100">
+            <div class="meme-header">
+              <span class="meme-number">#02</span>
+              <span class="meme-icon">🎲</span>
+            </div>
+            <p class="meme-quote">
+              "May your birthday luck be better than your artifact substats."
+            </p>
+            <div class="meme-tag">CRIT Rate +999%</div>
+          </div>
+
+          <!-- Meme 3 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="150">
+            <div class="meme-header">
+              <span class="meme-number">#03</span>
+              <span class="meme-icon">🌟</span>
+            </div>
+            <p class="meme-quote">
+              "May you never lose your 50/50, whether in Genshin or in life."
+            </p>
+            <div class="meme-tag">Guaranteed 5-Star</div>
+          </div>
+
+          <!-- Meme 4 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="200">
+            <div class="meme-header">
+              <span class="meme-number">#04</span>
+              <span class="meme-icon">🎂</span>
+            </div>
+            <p class="meme-quote">
+              "Original Resin regenerates over time, but birthday cake calories are not today's concern. Enjoy your day!"
+            </p>
+            <div class="meme-tag">Resin Cap = Unlimited</div>
+          </div>
+
+          <!-- Meme 5 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="250">
+            <div class="meme-header">
+              <span class="meme-number">#05</span>
+              <span class="meme-icon">🗺️</span>
+            </div>
+            <p class="meme-quote">
+              "Remember: You can teleport in Teyvat, but unfortunately, you still have to walk uphill in real life."
+            </p>
+            <div class="meme-tag">Stamina Food Required</div>
+          </div>
+
+          <!-- Meme 6 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="300">
+            <div class="meme-header">
+              <span class="meme-number">#06</span>
+              <span class="meme-icon">🍰</span>
+            </div>
+            <p class="meme-quote">
+              "Emergency food? No. Emergency birthday cake!"
+            </p>
+            <div class="meme-tag">Paimon Approved</div>
+          </div>
+
+          <!-- Meme 7 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="350">
+            <div class="meme-header">
+              <span class="meme-number">#07</span>
+              <span class="meme-icon">⏰</span>
+            </div>
+            <p class="meme-quote">
+              "POV: You said you're only going to explore for five minutes, and suddenly it's three hours later."
+            </p>
+            <div class="meme-tag">Just One More Chest...</div>
+          </div>
+
+          <!-- Meme 8 -->
+          <div class="meme-card" data-aos="zoom-in" data-aos-delay="400">
+            <div class="meme-header">
+              <span class="meme-number">#08</span>
+              <span class="meme-icon">🏆</span>
+            </div>
+            <p class="meme-quote">
+              "New achievement: Survived another year without becoming an NPC."
+            </p>
+            <div class="meme-tag">Protagonist Energy</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         8. PERSONALIZED BIRTHDAY LETTER
+         ============================================== -->
+    <section id="birthday-letter" class="letter-section section-padding">
+      <div class="container">
+        <div class="section-heading text-center" data-aos="fade-down">
+          <span class="section-tag-gold">✦ A MESSAGE FROM A FELLOW TRAVELER ✦</span>
+          <h2 class="section-title">A Little Birthday Message</h2>
+          <p class="section-subtitle">
+            "A personal scroll written with warmth, respect, and best wishes for the road ahead."
+          </p>
+        </div>
+
+        <div class="letter-presentation-wrap" data-aos="zoom-in">
+          <!-- Interactive Envelope Presentation -->
+          <div class="envelope-outer" id="interactive-envelope">
+            <div class="envelope-flap" id="envelope-flap">
+              <div class="wax-seal" id="wax-seal" role="button" tabindex="0" aria-label="Break Wax Seal to Open Birthday Letter">
+                <span class="seal-icon">✦</span>
+                <span class="seal-text">OPEN</span>
+              </div>
+            </div>
+
+            <!-- Letter Paper Scroll -->
+            <article class="parchment-letter" id="parchment-letter" aria-label="Win's Birthday Letter">
+              <div class="parchment-corner top-left"></div>
+              <div class="parchment-corner top-right"></div>
+              <div class="parchment-corner bottom-left"></div>
+              <div class="parchment-corner bottom-right"></div>
+
+              <!-- Decorative Floral Header -->
+              <div class="letter-header-flowers">
+                <span class="floral-sprig">🪻</span>
+                <span class="letter-stamp">TRAVELER'S DISPATCH · SPECIAL EDITION</span>
+                <span class="floral-sprig">🌷</span>
+              </div>
+
+              <div class="letter-salutation">
+                Dear Win,
+              </div>
+
+              <div class="letter-body">
+                <p class="letter-greeting-lead">
+                  Happy Birthday!
+                </p>
+
+                <p>
+                  I hope today brings you as much happiness as getting a double 5-star pull, as much excitement as discovering a new region in Teyvat, and as many wonderful surprises as finding a perfect artifact.
+                </p>
+
+                <p>
+                  May this new chapter of your life be filled with new adventures, beautiful destinations, exciting experiences, and opportunities to discover things you've always wanted to try.
+                </p>
+
+                <p>
+                  Whether it's reaching a new mountain peak, completing another running milestone, enjoying a fun pickleball match, or simply appreciating the little things around you, I hope you always find something that makes your day special.
+                </p>
+
+                <p>
+                  May you collect more memories than Primogems, encounter more beautiful places than teleport waypoints, and receive more blessings than a lucky wish banner.
+                </p>
+
+                <p>
+                  And remember, even the strongest Travelers need to rest sometimes. So don't forget to enjoy the journey, take breaks, and celebrate every little achievement along the way.
+                </p>
+
+                <p class="letter-closing-wish">
+                  Have an amazing birthday, Win!
+                </p>
+
+                <div class="letter-ps-box">
+                  <strong>P.S.</strong> Paimon officially declares today a no-commission, no-artifact-farming, unlimited-birthday-cake event. Enjoy! 😂
+                </div>
+
+                <div class="letter-final-signoff">
+                  Happy Birthday once again! <span class="heart-accent">♡</span>
+                </div>
+              </div>
+
+              <!-- Wax stamp emblem in corner -->
+              <div class="letter-bottom-emblem">
+                <span class="emblem-gem">✦</span>
+                <span>Teyvat Adventurers' Guild</span>
+                <span class="emblem-gem">✦</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         9. INTERACTIVE BIRTHDAY GIFT
+         ============================================== -->
+    <section id="surprise-gift" class="gift-section section-padding">
+      <div class="container text-center">
+        <div class="section-heading" data-aos="fade-down">
+          <span class="section-tag-gold">✦ FINAL CHEST OF THE REALM ✦</span>
+          <h2 class="section-title">ONE LAST SURPRISE!</h2>
+          <p class="section-subtitle">
+            "Every adventurer deserves a special reward."
+          </p>
+        </div>
+
+        <!-- 3D Interactive Birthday Gift Box -->
+        <div class="gift-showcase-box" data-aos="zoom-in">
+          <div class="gift-3d-wrapper" id="birthday-gift-box" role="button" tabindex="0" aria-label="Interactive Birthday Gift Box. Tap to open!">
+            <div class="gift-lid-3d" id="gift-lid">
+              <div class="lid-ribbon-horizontal"></div>
+              <div class="lid-ribbon-vertical"></div>
+              <div class="lid-bow">
+                <span class="bow-loop left"></span>
+                <span class="bow-knot">✦</span>
+                <span class="bow-loop right"></span>
+              </div>
+            </div>
+            <div class="gift-body-3d">
+              <div class="body-ribbon-vertical"></div>
+              <div class="body-shine"></div>
+              <div class="body-pattern">✦ ✧ ✦</div>
+            </div>
+            <div class="gift-glow-halo"></div>
+            <div class="gift-click-prompt">✦ Tap to Unbox Your Special Birthday Surprise! ✦</div>
+          </div>
+        </div>
+
+        <!-- Hidden Reward Modal Card (Populated after opening) -->
+        <div id="gift-reveal-modal" class="genshin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="gift-modal-title">
+          <div class="genshin-modal-box gift-reward-card">
+            <div class="gift-modal-flower-burst">🌸 🌼 🌺 🌷 🌻 🪻</div>
+            <div class="modal-crown">👑</div>
+            <h2 id="gift-modal-title" class="gift-modal-title">
+              Congratulations, Win!
+            </h2>
+            <p class="gift-modal-subtitle">
+              You've successfully completed your birthday event.
+            </p>
+
+            <div class="gift-rewards-list-card">
+              <h3 class="rewards-card-header">Your Official Birthday Blessing Rewards:</h3>
+              <ul class="rewards-checklist">
+                <li><span class="r-icon">💖</span> A year filled with happiness.</li>
+                <li><span class="r-icon">🗺️</span> More adventures and discoveries.</li>
+                <li><span class="r-icon">📸</span> Wonderful memories.</li>
+                <li><span class="r-icon">🏸</span> New skills and experiences.</li>
+                <li><span class="r-icon">🍀</span> Good health and countless blessings.</li>
+              </ul>
+            </div>
+
+            <p class="gift-modal-final-motto">
+              "May your next chapter be your most exciting adventure yet!"
+            </p>
+
+            <button id="btn-claim-reward-final" class="btn-genshin btn-claim-big">
+              <span class="btn-shine"></span>
+              <span class="btn-icon">🌟</span>
+              <span class="btn-text">CLAIM MY REWARD</span>
+              <span class="btn-icon">🌟</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         10. FINAL SECTION – UNTIL THE NEXT ADVENTURE
+         ============================================== -->
+    <footer id="farewell" class="farewell-section">
+      <div class="sunset-backdrop">
+        <div class="sunset-sun"></div>
+        <div class="sunset-mountains back"></div>
+        <div class="sunset-mountains front"></div>
+        <div class="sunset-grass-layer">
+          <div class="wind-swaying-flowers">
+            <span class="sway-flower sf1">🌷</span>
+            <span class="sway-flower sf2">🌼</span>
+            <span class="sway-flower sf3">🪻</span>
+            <span class="sway-flower sf4">🌸</span>
+            <span class="sway-flower sf5">🌻</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="container farewell-content text-center" data-aos="fade-up">
+        <div class="farewell-star-constellation">✦ ✦ ✦</div>
+
+        <h2 class="farewell-main-title">
+          May Your Next Adventure Be Your Best One Yet.
+        </h2>
+
+        <p class="farewell-text">
+          Keep exploring, keep discovering, keep growing, and never lose that adventurous spirit.
+        </p>
+
+        <div class="farewell-banner">
+          <span class="banner-border"></span>
+          <h1 class="farewell-greeting">HAPPY BIRTHDAY, WIN!</h1>
+          <span class="banner-border"></span>
+        </div>
+
+        <!-- Paimon farewell dialog -->
+        <div class="paimon-farewell-card">
+          <span class="paimon-float-badge">🧚‍♀️ Paimon's Parting Words</span>
+          <p class="paimon-farewell-text">
+            "Don't forget to claim your daily birthday happiness! Bye-bye!"
+          </p>
+        </div>
+
+        <div class="farewell-footer-credits">
+          <p class="footer-note">End of Event · See You in the Next Adventure, Traveler!</p>
+          <p class="footer-sub">Crafted with pure HTML, CSS & JavaScript for Win's Special Day ✦</p>
+          <a href="#hero" class="btn-back-to-top" aria-label="Return to top of page">
+            <span>↑ Return to Waypoint</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
